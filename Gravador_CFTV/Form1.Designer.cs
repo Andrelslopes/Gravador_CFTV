@@ -41,8 +41,10 @@
             this.txtConfpass = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.txtRtspUrl = new System.Windows.Forms.TextBox();
             this.btnTestPort = new System.Windows.Forms.Button();
-            this.label12 = new System.Windows.Forms.Label();
+            this.lblNotification = new System.Windows.Forms.Label();
             this.cbxChannel = new System.Windows.Forms.ComboBox();
             this.label11 = new System.Windows.Forms.Label();
             this.cbxManufacturer = new System.Windows.Forms.ComboBox();
@@ -62,8 +64,6 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
-            this.txtRtspUrl = new System.Windows.Forms.TextBox();
-            this.label13 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.videoView1)).BeginInit();
@@ -190,7 +190,7 @@
             this.groupBox1.Controls.Add(this.label13);
             this.groupBox1.Controls.Add(this.txtRtspUrl);
             this.groupBox1.Controls.Add(this.btnTestPort);
-            this.groupBox1.Controls.Add(this.label12);
+            this.groupBox1.Controls.Add(this.lblNotification);
             this.groupBox1.Controls.Add(this.cbxChannel);
             this.groupBox1.Controls.Add(this.label11);
             this.groupBox1.Controls.Add(this.cbxManufacturer);
@@ -223,6 +223,22 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Cadastrar Dispositivo:";
             // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(8, 203);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(27, 16);
+            this.label13.TabIndex = 21;
+            this.label13.Text = "Url:";
+            // 
+            // txtRtspUrl
+            // 
+            this.txtRtspUrl.Location = new System.Drawing.Point(7, 222);
+            this.txtRtspUrl.Name = "txtRtspUrl";
+            this.txtRtspUrl.Size = new System.Drawing.Size(510, 22);
+            this.txtRtspUrl.TabIndex = 20;
+            // 
             // btnTestPort
             // 
             this.btnTestPort.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
@@ -234,15 +250,15 @@
             this.btnTestPort.UseVisualStyleBackColor = true;
             this.btnTestPort.Click += new System.EventHandler(this.btnTestPort_Click);
             // 
-            // label12
+            // lblNotification
             // 
-            this.label12.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label12.Location = new System.Drawing.Point(8, 295);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(510, 47);
-            this.label12.TabIndex = 25;
-            this.label12.Text = "Notificações";
-            this.label12.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblNotification.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblNotification.Location = new System.Drawing.Point(8, 295);
+            this.lblNotification.Name = "lblNotification";
+            this.lblNotification.Size = new System.Drawing.Size(510, 47);
+            this.lblNotification.TabIndex = 25;
+            this.lblNotification.Text = "Notificações";
+            this.lblNotification.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // cbxChannel
             // 
@@ -428,22 +444,6 @@
             this.button4.Text = "Limpar";
             this.button4.UseVisualStyleBackColor = true;
             // 
-            // txtRtspUrl
-            // 
-            this.txtRtspUrl.Location = new System.Drawing.Point(7, 222);
-            this.txtRtspUrl.Name = "txtRtspUrl";
-            this.txtRtspUrl.Size = new System.Drawing.Size(510, 22);
-            this.txtRtspUrl.TabIndex = 20;
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(8, 203);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(27, 16);
-            this.label13.TabIndex = 21;
-            this.label13.Text = "Url:";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -505,7 +505,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label lblNotification;
         private System.Windows.Forms.Button btnTestPort;
         private System.Windows.Forms.TextBox txtRtspUrl;
         private System.Windows.Forms.Label label13;

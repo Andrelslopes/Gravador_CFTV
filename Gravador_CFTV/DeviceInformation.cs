@@ -19,5 +19,6 @@ namespace Gravador_CFTV
         public string Username { get; set; }
         public string Password { get; set; }
         public string Stream { get; set; }
+        public string CustomUrl { get; set; }
     }
 }

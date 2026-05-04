@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LibVLCSharp.Shared;
+using LibVLCSharp.WinForms; // Certifique-se de ter o pacote WinForms instalado
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,8 +10,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using LibVLCSharp.Shared;
-using LibVLCSharp.WinForms; // Certifique-se de ter o pacote WinForms instalado
+using static Gravador_CFTV.AppEnums;
 
 namespace Gravador_CFTV
 {
@@ -45,6 +46,49 @@ namespace Gravador_CFTV
             cbxStream.DisplayMember = "Text";
             cbxStream.ValueMember = "Value";
             cbxStream.SelectedIndex = -1;
+        }
+
+        public string GetRtspUrl(DeviceInformation device)
+        {
+            switch (device.Manufacturer)
+            {
+                case Manufacturer.Hikvision:
+                    return $"rtsp://{device.Username}:{device.Password}@{device.IP}:{device.Port}/Streaming/Channels/{device.Channel}01";
+
+                case Manufacturer.Intelbras:
+                    return $"rtsp://{device.Username}:{device.Password}@{device.IP}:{device.Port}/cam/realmonitor?channel={device.Channel}&subtype=0";
+
+                case Manufacturer.Dahua:
+                    return $"rtsp://{device.Username}:{device.Password}@{device.IP}:{device.Port}/cam/realmonitor?channel={device.Channel}&subtype=0";
+
+                case Manufacturer.Other:
+                    return device.CustomUrl;
+
+                default:
+                    return string.Empty;
+            }
+        }
+
+        private void TestarStream(string url)
+        {
+            try
+            {
+                Core.Initialize();
+
+                _libVLC = new LibVLC();
+                _mediaPlayer = new MediaPlayer(_libVLC);
+
+                videoView1.MediaPlayer = _mediaPlayer;
+
+                var media = new Media(_libVLC, new Uri(url));
+                _mediaPlayer.Play(media);
+
+                lblNotification.Text = "Conectando...";
+            }
+            catch (Exception ex)
+            {
+                lblNotification.Text = "Erro: " + ex.Message;
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -169,7 +213,30 @@ namespace Gravador_CFTV
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
+            Manufacturer manufacturer;
 
+            if (!Enum.TryParse(cbxManufacturer.SelectedValue.ToString(), out manufacturer))
+            {
+                MessageBox.Show("Fabricante inválido.");
+                return;
+            }
+
+            var device = new DeviceInformation
+            {
+                IP = txtIp.Text,
+                Port = int.Parse(txtPort.Text),
+                Username = txtUser.Text,
+                Password = txtPass.Text,
+                Channel = Convert.ToInt32(cbxChannel.SelectedItem.ToString().Replace("Canal ", "")),
+                Manufacturer = manufacturer, // ✅ CORRETO
+                CustomUrl = txtRtspUrl.Text
+            };
+
+            string rtspUrl = GetRtspUrl(device);
+
+            txtRtspUrl.Text = rtspUrl;
+
+            TestarStream(rtspUrl);
         }
 
         private void btnSave_Click(object sender, EventArgs e)

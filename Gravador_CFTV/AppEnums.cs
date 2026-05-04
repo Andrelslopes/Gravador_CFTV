@@ -29,7 +29,7 @@ namespace Gravador_CFTV
             Intelbras,
             [Description("Dahua")]
             Dahua,
-            [Description("Outro")]
+            [Description("Other")]
             Other
         }
 
