@@ -75,39 +75,89 @@ namespace Gravador_CFTV
             {
                 Core.Initialize();
 
-                _libVLC = new LibVLC();
+                _libVLC = new LibVLC(enableDebugLogs: true);
+
+                _libVLC.Log += (sender, e) =>
+                {
+                    Invoke(new Action(() =>
+                    {
+                        txtLogs.AppendText(
+                            $"[{e.Level}] {e.Module}: {e.Message}" +
+                            Environment.NewLine);
+                    }));
+                };
+
                 _mediaPlayer = new MediaPlayer(_libVLC);
 
                 videoView1.MediaPlayer = _mediaPlayer;
 
+                _mediaPlayer.Playing += (s, e) =>
+                {
+                    Invoke(new Action(() =>
+                    {
+                        lblNotification.Text = "Conectado";
+                        lblNotification.BackColor = ColorTranslator.FromHtml("#32CD32"); // LimeGreen
+                    }));
+                };
+
+                _mediaPlayer.EncounteredError += (s, e) =>
+                {
+                    Invoke(new Action(() =>
+                    {
+                        lblNotification.Text = "Erro ao conectar";
+                        lblNotification.BackColor = ColorTranslator.FromHtml("#FF6347"); // Tomate (vermelho)
+                    }));
+                };
+
                 var media = new Media(_libVLC, new Uri(url));
+
                 _mediaPlayer.Play(media);
 
                 lblNotification.Text = "Conectando...";
+                lblNotification.BackColor = ColorTranslator.FromHtml("#FFA500"); // Laranja
             }
             catch (Exception ex)
             {
-                lblNotification.Text = "Erro: " + ex.Message;
+                lblNotification.Text = ex.Message;
             }
+        }
+
+        private void ResetarPlayer()
+        {
+            if (videoView1.MediaPlayer != null)
+            {
+                try
+                {
+                    videoView1.MediaPlayer.Stop();
+                    videoView1.MediaPlayer.Dispose();
+                }
+                catch { }
+            }
+
+            videoView1.MediaPlayer = new MediaPlayer(_libVLC);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             LoadCombos();
+            txtPass.UseSystemPasswordChar = true;
+            txtConfpass.UseSystemPasswordChar = true;
         }
 
         private void txtId_TextChanged(object sender, EventArgs e)
         {
-
+            txtIp.BackColor = SystemColors.Window; // Cor padrão
         }
 
         private void txtName_TextChanged(object sender, EventArgs e)
         {
-
+            txtName .BackColor = SystemColors.Window; // Cor padrão
         }
 
         private void cbxDeviceType_SelectedIndexChanged(object sender, EventArgs e)
         {
+            cbxDeviceType.BackColor = SystemColors.Window; // Cor padrão
+
             if (cbxDeviceType.SelectedValue == null)
                 return;
 
@@ -120,8 +170,8 @@ namespace Gravador_CFTV
             if (tipo == AppEnums.DeviceType.CameraIP)
             {
                 cbxChannel.Items.Add("Canal 1");
-                cbxChannel.SelectedIndex = 0;
-                cbxChannel.Enabled = false; // opcional (melhor UX)
+                cbxChannel.SelectedIndex = -1;
+                //cbxChannel.Enabled = false; // opcional (melhor UX)
             }
             else
             {
@@ -131,53 +181,63 @@ namespace Gravador_CFTV
                               .ToArray()
                 );
 
-                cbxChannel.SelectedIndex = 0;
+                cbxChannel.SelectedIndex = -1;
                 cbxChannel.Enabled = true;
             }
         }
 
         private void cbxManufacturer_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            cbxManufacturer.BackColor = SystemColors.Window; // Cor padrão
         }
 
         private void cbxChannel_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            cbxChannel.BackColor = SystemColors.Window; // Cor padrão
         }
 
         private void txtIp_TextChanged(object sender, EventArgs e)
         {
-
+            txtIp.BackColor = SystemColors.Window; // Cor padrão
         }
 
         private void txtPort_TextChanged(object sender, EventArgs e)
         {
-
+            txtPort.BackColor = SystemColors.Window; // Cor padrão
+        }
+        private void cbxStream_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            cbxStream.BackColor = SystemColors.Window; // Cor padrão
         }
 
         private void txtUser_TextChanged(object sender, EventArgs e)
         {
-
+            txtUser.BackColor = SystemColors.Window; // Cor padrão
         }
 
         private void txtPass_TextChanged(object sender, EventArgs e)
         {
-
+            txtPass.BackColor = SystemColors.Window; // Cor padrão
         }
 
         private void txtConfpass_TextChanged(object sender, EventArgs e)
         {
-
+            txtConfpass.BackColor = SystemColors.Window; // Cor padrão
         }
 
         private void btnTestPort_Click(object sender, EventArgs e)
         {
             string ip = txtIp.Text;
-            int port = int.Parse(txtPort.Text);
 
+            // Valida se o IP não está vazio ou nulo
+            if (string.IsNullOrWhiteSpace(ip))
+            {
+                MessageBox.Show("Por favor, insira um endereço IP válido.",
+                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             // Valida se a porta é um número
-            if (!int.TryParse(txtPort.Text, out port))
+            if (!int.TryParse(txtPort.Text, out int port))
             {
                 MessageBox.Show("Por favor, insira uma porta válida.",
                     "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -213,35 +273,121 @@ namespace Gravador_CFTV
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
-            Manufacturer manufacturer;
 
-            if (!Enum.TryParse(cbxManufacturer.SelectedValue.ToString(), out manufacturer))
+            string errorMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(txtName.Text))
             {
-                MessageBox.Show("Fabricante inválido.");
-                return;
+                errorMessage += "Nome.\n";
+                txtName.BackColor = ColorTranslator.FromHtml("#FEC6C6"); // Vermelho claro
             }
 
-            var device = new DeviceInformation
+            if (cbxDeviceType.SelectedValue == null)
             {
-                IP = txtIp.Text,
-                Port = int.Parse(txtPort.Text),
-                Username = txtUser.Text,
-                Password = txtPass.Text,
-                Channel = Convert.ToInt32(cbxChannel.SelectedItem.ToString().Replace("Canal ", "")),
-                Manufacturer = manufacturer, // ✅ CORRETO
-                CustomUrl = txtRtspUrl.Text
-            };
+                errorMessage += "Tipo de Dispositivo.\n";
+                cbxDeviceType.BackColor = ColorTranslator.FromHtml("#FEC6C6"); // Vermelho claro
+            }
 
-            string rtspUrl = GetRtspUrl(device);
+            if (cbxManufacturer.SelectedValue == null)
+            {
+                errorMessage += "Fabricante.\n";
+                cbxManufacturer.BackColor = ColorTranslator.FromHtml("#FEC6C6");
+            }
 
-            txtRtspUrl.Text = rtspUrl;
+            if (cbxChannel.SelectedItem == null)
+            {
+                errorMessage += "Canal.\n";
+                cbxChannel.BackColor = ColorTranslator.FromHtml("#FEC6C6");
+            }
 
-            TestarStream(rtspUrl);
+            if (string.IsNullOrWhiteSpace(txtIp.Text))
+            {
+                errorMessage += "IP.\n";
+                txtIp.BackColor = ColorTranslator.FromHtml("#FEC6C6"); // Vermelho claro
+            }
+
+            if (string.IsNullOrWhiteSpace(txtPort.Text))
+            {
+                errorMessage += "Porta.\n";
+                txtPort.BackColor = ColorTranslator.FromHtml("#FEC6C6");
+            }
+
+            if (cbxStream.SelectedValue == null)
+            {
+                errorMessage += "Tipo de Stream.\n";
+                cbxStream.BackColor = ColorTranslator.FromHtml("#FEC6C6");
+            }
+
+            if (string.IsNullOrWhiteSpace(txtUser.Text))
+            {
+                errorMessage += "Usuário.\n";
+                txtUser.BackColor = ColorTranslator.FromHtml("#FEC6C6");
+            }
+
+            if (string.IsNullOrWhiteSpace(txtPass.Text))
+            {
+                errorMessage += "Senha.\n";
+                txtPass.BackColor = ColorTranslator.FromHtml("#FEC6C6");
+            }
+
+            if (string.IsNullOrWhiteSpace(txtConfpass.Text))
+            {
+                errorMessage += "Confirmação de Senha.\n";
+                txtConfpass.BackColor = ColorTranslator.FromHtml("#FEC6C6");
+            }
+
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                MessageBox.Show($"Os seguintes campos são obrigatórios:\n\n{errorMessage}",
+                    "Campos Obrigatórios", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            else
+            {
+                ResetarPlayer();
+
+                Manufacturer manufacturer;
+
+                if (!Enum.TryParse(cbxManufacturer.SelectedValue.ToString(), out manufacturer))
+                {
+                    MessageBox.Show("Fabricante inválido.");
+                    return;
+                }
+
+                var device = new DeviceInformation
+                {
+                    IP = txtIp.Text,
+                    Port = int.Parse(txtPort.Text),
+                    Username = txtUser.Text,
+                    Password = txtPass.Text,
+                    Channel = Convert.ToInt32(cbxChannel.SelectedItem.ToString().Replace("Canal ", "")),
+                    Manufacturer = manufacturer,
+                    CustomUrl = txtRtspUrl.Text
+                };
+
+                string rtspUrl = GetRtspUrl(device);
+
+                txtRtspUrl.Text = rtspUrl;
+
+                TestarStream(rtspUrl);
+            }
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void txtConfpass_Leave(object sender, EventArgs e)
+        {
+            if (txtPass.Text != txtConfpass.Text)
+            {
+                txtConfpass.BackColor = ColorTranslator.FromHtml("#FEC6C6"); // Vermelho claro
+            }
+            else
+            {
+                txtConfpass.BackColor = SystemColors.Window; // Cor padrão
+            }
         }
     }
 }

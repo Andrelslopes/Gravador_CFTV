@@ -17,7 +17,7 @@ namespace Gravador_CFTV
             DVR,
             [Description("NVR")]
             NVR,
-            [Description("Outro")]
+            [Description("Other")]
             Other
         }
 
