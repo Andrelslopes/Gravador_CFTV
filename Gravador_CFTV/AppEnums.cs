@@ -35,9 +35,9 @@ namespace Gravador_CFTV
 
         public enum StreamType
         {
-            [Description("Main Stream")]
+            [Description("Principal")]
             Main,
-            [Description("Sub Stream")]
+            [Description("Secundário")]
             Sub
         }
     }

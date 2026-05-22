@@ -53,13 +53,19 @@ namespace Gravador_CFTV
             switch (device.Manufacturer)
             {
                 case Manufacturer.Hikvision:
-                    return $"rtsp://{device.Username}:{device.Password}@{device.IP}:{device.Port}/Streaming/Channels/{device.Channel}01";
+
+                    string hikStream =
+                        device.Stream == StreamType.Main ? "01" : "02";
+
+                    return $"rtsp://{device.Username}:{device.Password}@{device.IP}:{device.Port}/Streaming/Channels/{device.Channel}{hikStream}";
 
                 case Manufacturer.Intelbras:
-                    return $"rtsp://{device.Username}:{device.Password}@{device.IP}:{device.Port}/cam/realmonitor?channel={device.Channel}&subtype=0";
-
                 case Manufacturer.Dahua:
-                    return $"rtsp://{device.Username}:{device.Password}@{device.IP}:{device.Port}/cam/realmonitor?channel={device.Channel}&subtype=0";
+
+                    string subtype =
+                        device.Stream == StreamType.Main ? "0" : "1";
+
+                    return $"rtsp://{device.Username}:{device.Password}@{device.IP}:{device.Port}/cam/realmonitor?channel={device.Channel}&subtype={subtype}";
 
                 case Manufacturer.Other:
                     return device.CustomUrl;
@@ -362,6 +368,7 @@ namespace Gravador_CFTV
                     Password = txtPass.Text,
                     Channel = Convert.ToInt32(cbxChannel.SelectedItem.ToString().Replace("Canal ", "")),
                     Manufacturer = manufacturer,
+                    Stream = (StreamType)cbxStream.SelectedValue,
                     CustomUrl = txtRtspUrl.Text
                 };
 
